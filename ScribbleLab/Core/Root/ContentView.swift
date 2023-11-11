@@ -8,8 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var viewModel = ContentViewModel()
+
     var body: some View {
-        SLSideBarView()
+        Group {
+            if $viewModel.userSession == nil {
+                SignUpView()
+            } else if let currentUser = viewModel.currentUser { // viewModel.currentUser != nil
+               SLSideBarView()
+            }
+        }
     }
 }
 

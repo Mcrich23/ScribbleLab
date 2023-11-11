@@ -11,10 +11,8 @@ struct SLSettingsView: View {
     @Environment(\.openURL) var openURL
     @State private var resetAlertIsPresented = false
     @State private var deleteAccountIsPresented = false
+    @State private var redemtionSheetIsPresented = false
     
-    // FIXME: only for evelopment purposes
-    @State private var newNotificationDeveloperTool = false
-
     var body: some View {
         NavigationStack {
             List {
@@ -40,6 +38,13 @@ struct SLSettingsView: View {
                             
                         }
                     }
+                    Label("Redeem Code", systemImage: "gift") // app.gift, giftcard
+                        .onTapGesture {
+                            redemtionSheetIsPresented.toggle()
+                        }
+                        .sheet(isPresented: $redemtionSheetIsPresented) {
+                            RedemtionSheetView()
+                        }
                 } header: {
                     Text("Profile")
                 } footer: {
@@ -47,16 +52,25 @@ struct SLSettingsView: View {
                 }
                 
                 Section() {
-                    Label("Darkmode", systemImage: "moon.fill")
+                    NavigationLink {
+                        SLDarkmodeSettingsView()
+                    } label:{
+                        Label("Darkmode", systemImage: "moon.fill")
+                    }
                     Label("Units", systemImage: "ruler")
                     Label("Apple Pencil", systemImage: "applepencil.and.scribble")
                     Label("Autocorrection", systemImage: "textformat.abc.dottedunderline")
-                    Label("Accessibility", systemImage: "person.fill")
+                    Label("Accessibility", systemImage: "accessibility")
                     Label("Notifications", systemImage: "bell.badge")
                     Label("Privacy", systemImage: "hand.raised.fill")
                     Label("Collaboration", systemImage: "person.2.badge.gearshape")
                     Label("Extensions", systemImage: "puzzlepiece.extension")
                     Label("Cloud sync", systemImage: "icloud")
+                    NavigationLink {
+                        SLOtherSettings()
+                    } label: {
+                        Label("Features", systemImage: "wand.and.stars.inverse")
+                    }
                 } header: {
                     Text("App settings")
                 } footer: {
@@ -95,7 +109,7 @@ struct SLSettingsView: View {
                     Text("These settings can cause loosing all you customized settings")
                 }
                 
-                #if os(macOS)
+//                #if os(macOS)
                 // MARK: App Update Section
                 Section() {
                     NavigationLink {
@@ -121,11 +135,19 @@ struct SLSettingsView: View {
                 } footer: {
                     Text("These settings are responsible for the updates of this app. In order to enroll to the programmes you need to be registered to our ScribbleLab Developer Programm (free). Follow [this link](https://github.com/ScribbleLabApp/ScribbleLab) for a more detailed description.")
                 }
-                #endif
+//                #endif
                 
                 Section() {
-                    Label("Info", systemImage: "info.bubble") // info.circle
-                    Label("Help", systemImage: "questionmark.bubble")
+                    NavigationLink {
+                        SLInfoView()
+                    } label: {
+                        Label("Info", systemImage: "info.bubble")
+                    } // info.circle
+                    NavigationLink {
+                        SLHelpView()
+                    } label: {
+                        Label("Help", systemImage: "questionmark.bubble")
+                    }
                     NavigationLink {
                         SLLicenseView()
                     } label: {
@@ -140,22 +162,6 @@ struct SLSettingsView: View {
                     Text("Other")
                 } footer: {
                     Text("")
-                }
-                
-                // MARK: - Developer settings
-                // FIXME: Delete this section when realesing the alpha v.0.0.1-alpha version
-                #warning("Developer setting")
-                Section() {
-                    Button {
-                        newNotificationDeveloperTool.toggle()
-                        print("DEBUG: new notification \(newNotificationDeveloperTool)")
-                    } label: {
-                        Label("Change state of newNotification", systemImage: "hammer")
-                    }
-                } header: {
-                    Text("Developer tools")
-                } footer: {
-                    Text("Developer settings. Only for testing purpsoses!")
                 }
             }
             .tint(.black)

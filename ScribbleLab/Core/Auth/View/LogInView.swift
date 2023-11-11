@@ -2,90 +2,135 @@
 //  LogInView.swift
 //  ScribbleLab
 //
-//  Created by Nevio Hirani on 08.10.23.
+//  Created by Nevio Hirani on 10.10.23.
 //
 
 import SwiftUI
+import GoogleSignIn
+import GoogleSignInSwift
+import FirebaseAuth
+import FirebaseCore
 
 struct LogInView: View {
-    @State private var email = ""
-    @State private var password = ""
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var viewModel = LoginViewModel()
+    @EnvironmentObject private var vm: SignInWithGoogleModel
+
     
     var body: some View {
-        ZStack {
-            Image(.backgroundElementDigital) // FIXME: Find another image
+        VStack {
+            Spacer()
+            
+            Image("logo-light-complex")
                 .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .overlay {
-                    Rectangle()
-                        .foregroundColor(.black)
-                        .opacity(0.15) // 0.3
-                        .ignoresSafeArea()
-                }
-                .blur(radius: 3.0)
-//            ZStack {
-//                Color.white
-//                    .frame(width: 700, height: 1000)
-//                    .cornerRadius(20)
+                .scaledToFit()
+                .frame(width: 420)
+            
+            VStack {
+                Text("Login to access your ScribbleLabApp account.")
+            }
+            .font(.title3)
+            .fontWeight(.medium)
+            
+            Spacer()
+            
+            VStack(spacing: 20) {
                 VStack {
-                    Image(.documentation)
-                        .resizable()
-                        .frame(width: 150, height: 150)
-                    VStack {
-                        // FIXME: Image "moves" away when clicking on a TextField
-                        TextField("Enter your email", text: $email)
-                            .modifier(IGTextFieldModifier())
+                    Button {
+                        vm.signInWithGoogle()
+                    } label: {
+                        HStack {
+                            Image("google")
+                                .resizable()
+                                .frame(width: 35, height: 35)
                             
-                        SecureField("Enter your password", text: $password)
-                            .modifier(IGTextFieldModifier())
+                            Text("Continue with Google")
+                                .padding(.horizontal, 60)
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.black)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 13)
+                        .background {
+                            RoundedRectangle(cornerRadius: 13)
+                                .fill(Color(red: 248/255, green: 248/255, blue: 248/255))
+                                .strokeBorder(Color(red: 194/255, green: 194/255, blue: 194/255), lineWidth: 0.5)
+                        }
                     }
-                    .frame(width: 500, height: 200)
                     
-                    // forgot password
-                    // FIXME: Fix alignment
                     Button {
-                        print("Forgot Password")
+                        
                     } label: {
-                        Text("Forgot Password?")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .padding(.top)
-                            .padding(.trailing, 28)
-                            .foregroundStyle(Color.black)
+                        HStack {
+                            Image("apple-logo-black")
+                                .resizable()
+                                .frame(width: 36, height: 35)
+                            
+                            Text("Continue with Apple")
+                                .padding(.horizontal, 60)
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.black)
+                        }
+                        .padding(.horizontal, 17)
+                        .padding(.vertical, 13)
+                        .background {
+                            RoundedRectangle(cornerRadius: 13)
+                                .fill(Color(red: 248/255, green: 248/255, blue: 248/255))
+                                .strokeBorder(Color(red: 194/255, green: 194/255, blue: 194/255), lineWidth: 0.5)
+                        }
                     }
-//                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .frame(width: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/ ,alignment: .trailing)
-                                    
-//                     log-in
+                }
+                
+                Divider()
+                    .frame(width: 359)
+                
+                VStack {
+                    TextField("Enter your email", text: $viewModel.email)
+                        .modifier(IGTextFieldModifier())
+                        .autocorrectionDisabled()
+                        .autocapitalization(.none)
+                    
+                    SecureField("Enter your password", text: $viewModel.password)
+                        .modifier(IGTextFieldModifier())
+                                        
                     Button {
-                        print("Handle Login")
+                        Task { try await viewModel.signIn() }
                     } label: {
-                        Text("Login")
+                        Text("Log in with email")
                             .modifier(IGButtonModifier())
                     }
-                    .padding(.vertical)
-                    
-                    // Custome Divider
-                    HStack {
-                        Rectangle()
-                            .frame(width: (UIScreen.main.bounds.width / 2) - 40, height: 0.5)
-                        
-                        Text("OR")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                        
-                        Rectangle()
-                            .frame(width: (UIScreen.main.bounds.width / 2) - 40, height: 0.5)
+                }
+                
+                VStack {
+                    HStack(spacing: 3) {
+                        Text("No account?")
+                            .foregroundStyle(.black)
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Create one.").bold()
+                                .foregroundStyle(Color.orange)
+                        }
                     }
-                    .foregroundColor(.gray)
-//                                .frame(width: 500, height: 50)
-//                }
+                    NavigationLink {
+                        ResetPasswordView()
+                            .navigationBarBackButtonHidden()
+                    } label: {
+                        Text("Forgot password?").bold().underline()
+                            .foregroundStyle(Color.orange)
+                    }
+                    .padding(.vertical, 12)
+                }
             }
+            Spacer()
         }
+        .padding()
     }
 }
 
 #Preview {
     LogInView()
+        .environmentObject(SignInWithGoogleModel())
 }
